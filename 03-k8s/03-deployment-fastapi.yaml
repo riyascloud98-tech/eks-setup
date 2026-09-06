@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
         - name: eks-india-fastapi
-          image: 590183900382.dkr.ecr.ap-south-1.amazonaws.com/eks-india-fastapi:latest
+          image: 590183900382.dkr.ecr.ap-south-1.amazonaws.com/eks-india-fastapi:266965df612f36dd543408a68ecfe6acb86984a0
           # :latest is fine to get started; a mutable tag means Kubernetes
           # won't know a new push happened unless told to re-check, so
           # force it to always pull. Once CI/CD is set up, switch to

@@ -27,7 +27,7 @@ spec:
     spec:
       containers:
         - name: eks-india-checkout
-          image: 590183900382.dkr.ecr.ap-south-1.amazonaws.com/eks-india-checkout:latest
+          image: 590183900382.dkr.ecr.ap-south-1.amazonaws.com/eks-india-checkout:c44ea6eddaaae178679419f1d66f49abcf9e841f
           imagePullPolicy: Always
           ports:
             - containerPort: 3000

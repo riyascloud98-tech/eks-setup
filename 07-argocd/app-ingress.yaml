@@ -1,0 +1,26 @@
+# Step 7b — same idea as app-k8s.yaml, watching 05-ingress/ instead.
+# Kept as a separate Application (rather than folded into app-k8s.yaml)
+# because it changes far less often than the app Deployments do, and
+# because an Ingress mistake risks the shared ALB itself — worth being
+# able to reason about, sync, and roll back independently from routine
+# app deploys.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: india-ingress
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/riyascloud98-tech/eks-setup.git
+    targetRevision: master
+    path: 05-ingress
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: india
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

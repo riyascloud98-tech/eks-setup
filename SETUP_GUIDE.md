@@ -179,9 +179,3 @@ aws ec2 create-tags --resources subnet-06b97ccb48b7eebc6 subnet-0595dc8c2cb950f9
 aws ec2 create-tags --resources subnet-08696b445eb48a346 subnet-08a5dc4d027dd3d9c subnet-0545f7c585e03f968 \
   --tags Key=kubernetes.io/role/internal-elb,Value=1 Key=kubernetes.io/cluster/india-eks,Value=shared
 ```
-
-## 8. What's next (not covered by this guide)
-
-- CI/CD (you said this is phase 2) — will replace the manual
-  `docker build`/`push`/`kubectl apply` cycle with something automatic on
-  git push.

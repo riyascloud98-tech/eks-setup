@@ -1,0 +1,27 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ECRAuth",
+      "Effect": "Allow",
+      "Action": "ecr:GetAuthorizationToken",
+      "Resource": "*"
+    },
+    {
+      "Sid": "ECRPushOnlyTheseThreeRepos",
+      "Effect": "Allow",
+      "Action": [
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:PutImage",
+        "ecr:InitiateLayerUpload",
+        "ecr:UploadLayerPart",
+        "ecr:CompleteLayerUpload"
+      ],
+      "Resource": [
+        "arn:aws:ecr:ap-south-1:590183900382:repository/eks-india-root",
+        "arn:aws:ecr:ap-south-1:590183900382:repository/eks-india-checkout",
+        "arn:aws:ecr:ap-south-1:590183900382:repository/eks-india-fastapi"
+      ]
+    }
+  ]
+}

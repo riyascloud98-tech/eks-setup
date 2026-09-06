@@ -78,7 +78,7 @@ zip, extract `helm.exe`, and put it anywhere on your `PATH` (e.g. next to
 ```bash
 curl -sL -o helm.zip "https://get.helm.sh/helm-v4.2.4-windows-amd64.zip"
 powershell -NoProfile -Command "Expand-Archive -Path helm.zip -DestinationPath helm-extract -Force"
-cp helm-extract/windows-amd64/helm.exe "C:/Users/<you>/bin/helm.exe"  # or wherever eksctl.exe already lives
+cp helm-extract/windows-amd64/helm.exe "C:/Users/Acer/bin/helm.exe"  # or wherever eksctl.exe already lives
 helm version
 ```
 Check https://github.com/helm/helm/releases for the current version if

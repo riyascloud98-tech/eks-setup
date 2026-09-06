@@ -1,0 +1,36 @@
+# Step 7a — tells ArgoCD to continuously watch 03-k8s/ in this same repo
+# and keep the cluster matching it. This is the "manager comparing the
+# recipe book to what's actually running" from the explanation — once
+# this is applied, ArgoCD checks this path every few minutes (and
+# instantly on webhook, once GitHub is connected) and re-applies anything
+# that drifted, including the image tag that CI will update after every
+# push.
+#
+# 02-secret-valkey.example.yaml is deliberately excluded — it's a
+# template with placeholder REPLACE_ME values (see its own header
+# comment), never meant to be applied as-is. The real Secret was created
+# with `kubectl create secret generic ...` (an imperative command, never
+# committed to git) and ArgoCD leaves it alone since nothing in git
+# defines it.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: india-k8s
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/riyascloud98-tech/eks-setup.git
+    targetRevision: master
+    path: 03-k8s
+    directory:
+      exclude: "*.example.yaml"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: india
+  syncPolicy:
+    automated:
+      prune: true # if a file is deleted from git, remove it from the cluster too
+      selfHeal: true # if someone manually kubectl-edits something, revert it back to match git
+    syncOptions:
+      - CreateNamespace=true

@@ -1,0 +1,27 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Federated": "arn:aws:iam::590183900382:oidc-provider/token.actions.githubusercontent.com"
+      },
+      "Action": "sts:AssumeRoleWithWebIdentity",
+      "Condition": {
+        "StringEquals": {
+          "token.actions.githubusercontent.com:aud": "sts.amazonaws.com"
+        },
+        "StringLike": {
+          "token.actions.githubusercontent.com:sub": [
+            "repo:riyascloud98-tech@257077743/eks-india-root@1358252086:ref:refs/heads/master",
+            "repo:riyascloud98-tech@257077743/eks-india-checkout@1358252874:ref:refs/heads/master",
+            "repo:riyascloud98-tech@257077743/eks-india-fastapi@1358253321:ref:refs/heads/master",
+            "repo:riyascloud98-tech/eks-india-root:ref:refs/heads/master",
+            "repo:riyascloud98-tech/eks-india-checkout:ref:refs/heads/master",
+            "repo:riyascloud98-tech/eks-india-fastapi:ref:refs/heads/master"
+          ]
+        }
+      }
+    }
+  ]
+}

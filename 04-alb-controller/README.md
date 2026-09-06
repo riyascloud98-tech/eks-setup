@@ -114,5 +114,5 @@ kubectl get pods -n kube-system -l app.kubernetes.io/name=aws-load-balancer-cont
 Both pods should show `Running` / `1/1` within a minute or two. If they
 crash-loop, `kubectl logs -n kube-system deploy/aws-load-balancer-controller`
 almost always says exactly what's wrong (usually a missing IAM permission
-or a subnet tagging issue — see the note in `../SETUP_GUIDE.md` about
+or a subnet tagging issue — see the note in `../README.md` about
 subnet tags).

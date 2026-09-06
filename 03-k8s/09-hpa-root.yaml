@@ -1,0 +1,33 @@
+# HPA = "the manager watching how busy the waiters are." This watches
+# eks-india-root's pods; if their average CPU usage goes above 60% of
+# what each pod requested (100m, set in 05-deployment-root.yaml), it adds
+# more pod replicas — up to 6. Below that, it scales back down to as few
+# as 2 (never fewer, so there's always redundancy).
+#
+# This only works if there's room on an existing node. If all nodes are
+# full, new pods sit "Pending" until either a node frees up or Cluster
+# Autoscaler adds a new node (separate thing, not set up yet).
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: eks-india-root
+  namespace: india
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: eks-india-root
+  minReplicas: 2
+  maxReplicas: 6
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 60
+  behavior:
+    scaleDown:
+      # Wait 2 minutes of sustained low usage before removing a replica —
+      # avoids flapping (scale up, scale down, scale up...) from brief dips.
+      stabilizationWindowSeconds: 120

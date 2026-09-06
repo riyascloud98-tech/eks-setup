@@ -1,0 +1,48 @@
+# Step 5 (part 1 of 2) — the checkout app's rule, as its OWN Ingress
+# object, merged into the SAME ALB as 20-ingress-main.yaml via
+# group.name. This split exists for exactly one reason: eks-india-checkout
+# now runs with next.config.js's basePath: "/checkout" (fixes an asset
+# routing collision with eks-india-root — see that repo's next.config.js
+# for the full story), which moved its health endpoint to
+# "/checkout/healthz" — different from root/fastapi's plain "/healthz".
+# alb.ingress.kubernetes.io/healthcheck-path is an Ingress-wide setting,
+# not settable per-backend within one Ingress object, so a differing
+# health check path for one backend forces a second Ingress object.
+#
+# group.order: "10" (lower = evaluated first) guarantees this
+# more-specific /checkout rule is matched before 20-ingress-main.yaml's
+# catch-all "/" rule for the same host — that ordering isn't automatic
+# once the two rules live in separate objects.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: india-web-checkout
+  namespace: india
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/group.name: india-web
+    alb.ingress.kubernetes.io/group.order: "10"
+    # These ALB-level settings (scheme/subnets/SGs/listen-ports/cert) are
+    # shared by the whole group. AWS Load Balancer Controller requires
+    # them to match exactly across every Ingress in the group, so this
+    # block is intentionally identical to 20-ingress-main.yaml's.
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/subnets: subnet-06b97ccb48b7eebc6,subnet-0595dc8c2cb950f9d,subnet-08afc29177531432e
+    alb.ingress.kubernetes.io/security-groups: sg-0af370affe06ecae1 # eks-web-india-sg
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+    alb.ingress.kubernetes.io/ssl-redirect: "443"
+    alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:ap-south-1:590183900382:certificate/2303f522-9ec0-4740-9987-fb856d4f9565"
+    alb.ingress.kubernetes.io/healthcheck-path: /checkout/healthz
+spec:
+  rules:
+    - host: www.indiafilings.in
+      http:
+        paths:
+          - path: /checkout
+            pathType: Prefix
+            backend:
+              service:
+                name: eks-india-checkout
+                port:
+                  number: 80

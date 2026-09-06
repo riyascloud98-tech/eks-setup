@@ -1,0 +1,17 @@
+# Step 3e — a Service is a stable internal DNS name + load-balances
+# across whichever pods currently match the label selector (pods get
+# replaced constantly; the Service is what stays put). ClusterIP means
+# "internal only" — the Ingress/ALB (step 5) is what exposes this to the
+# internet, this Service itself is not internet-facing.
+apiVersion: v1
+kind: Service
+metadata:
+  name: eks-india-fastapi
+  namespace: india
+spec:
+  type: ClusterIP
+  selector:
+    app: eks-india-fastapi
+  ports:
+    - port: 80
+      targetPort: 8000

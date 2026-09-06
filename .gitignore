@@ -1,0 +1,10 @@
+# Downloaded Helm tools
+/04-alb-controller/helm.zip
+/04-alb-controller/helm-extract/
+
+# Local credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key

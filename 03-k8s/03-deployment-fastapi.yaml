@@ -1,0 +1,60 @@
+# Step 3d — the FastAPI backend. A Deployment describes "run N copies of
+# this container, keep them running, replace any that crash." 2 replicas
+# means one pod can go down (node drain, crash, rolling update) without
+# the API going fully offline.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eks-india-fastapi
+  namespace: india
+  labels:
+    app: eks-india-fastapi
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: eks-india-fastapi
+  template:
+    metadata:
+      labels:
+        app: eks-india-fastapi
+    spec:
+      containers:
+        - name: eks-india-fastapi
+          image: 590183900382.dkr.ecr.ap-south-1.amazonaws.com/eks-india-fastapi:latest
+          # :latest is fine to get started; a mutable tag means Kubernetes
+          # won't know a new push happened unless told to re-check, so
+          # force it to always pull. Once CI/CD is set up, switch to
+          # immutable tags (e.g. the git commit SHA) instead — this line
+          # can then go back to the default (IfNotPresent).
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: valkey-config
+            - secretRef:
+                name: valkey-credentials
+          # Kubernetes hits these itself; they're what actually decides
+          # whether a pod receives traffic (readiness) or gets restarted
+          # (liveness) — independent of the Dockerfile's own HEALTHCHECK,
+          # which only Docker itself looks at.
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"

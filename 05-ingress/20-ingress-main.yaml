@@ -1,0 +1,63 @@
+# Step 5 (part 2 of 2) — root + fastapi's rules, merged into the SAME ALB
+# as 10-ingress-checkout.yaml via group.name (see that file for why this
+# is split into two objects at all).
+#
+# group.order: "20" (higher number = evaluated later) — this must come
+# after the checkout Ingress's "/checkout" rule for the catch-all "/"
+# here to not swallow it first.
+#
+# DNS for indiafilings.in is on Cloudflare, not Route53 — applying these
+# Ingresses doesn't create any DNS record itself. Once both are applied,
+# the ALB controller creates the real ALB (one ALB, shared via
+# group.name) and its DNS name shows up via:
+#   kubectl get ingress -n india
+# Take that ALB DNS name (looks like
+# india-web-xxxxx.ap-south-1.elb.amazonaws.com) and create two CNAME
+# records in Cloudflare pointing at it: www.indiafilings.in and
+# fastapi.indiafilings.in. If Cloudflare's proxy (orange cloud) is on for
+# these records, turn it off (grey cloud / DNS-only) — a proxied CNAME
+# would terminate TLS at Cloudflare using *their* certificate, which
+# defeats the ACM cert below and double-hops the connection.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: india-web-main
+  namespace: india
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/group.name: india-web
+    alb.ingress.kubernetes.io/group.order: "20"
+    # Must be byte-for-byte identical to 10-ingress-checkout.yaml's copy
+    # of these — the controller errors if a shared ALB-level setting
+    # differs between Ingress objects in the same group.
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/subnets: subnet-06b97ccb48b7eebc6,subnet-0595dc8c2cb950f9d,subnet-08afc29177531432e
+    alb.ingress.kubernetes.io/security-groups: sg-0af370affe06ecae1 # eks-web-india-sg
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+    alb.ingress.kubernetes.io/ssl-redirect: "443"
+    alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:ap-south-1:590183900382:certificate/2303f522-9ec0-4740-9987-fb856d4f9565"
+    # root and fastapi both still use plain /healthz.
+    alb.ingress.kubernetes.io/healthcheck-path: /healthz
+spec:
+  rules:
+    - host: www.indiafilings.in
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: eks-india-root
+                port:
+                  number: 80
+    - host: fastapi.indiafilings.in
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: eks-india-fastapi
+                port:
+                  number: 80

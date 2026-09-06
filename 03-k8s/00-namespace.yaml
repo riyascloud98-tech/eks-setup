@@ -1,0 +1,9 @@
+# Step 3a — a Namespace groups the three apps together, separate from
+# Kubernetes' own system components (which live in kube-system). Not
+# strictly required — you could use "default" — but keeping app
+# workloads out of "default" makes cleanup, RBAC, and "kubectl get pods"
+# output much less confusing as you add more things later.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: india

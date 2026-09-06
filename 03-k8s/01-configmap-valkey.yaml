@@ -1,0 +1,20 @@
+# Step 3b — a ConfigMap is Kubernetes' equivalent of the non-secret half
+# of a .env file: plain key/value pairs, injected into the container as
+# environment variables. The FastAPI code already reads these with
+# os.getenv(...) (see app/cache.py) — nothing about the app code changes,
+# only *where* the values come from (a ConfigMap instead of a local
+# .env file).
+#
+# The password/username go in a Secret instead (02-secret-valkey.example.yaml)
+# — same idea, but base64-encoded at rest and access-controlled separately,
+# since those are credentials.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: valkey-config
+  namespace: india
+data:
+  VALKEY_HOST: "clustercfg.india-elasticache-test.ec5ns5.aps1.cache.amazonaws.com"
+  VALKEY_PORT: "6379"
+  VALKEY_TLS: "true"
+  CORS_ORIGINS: "https://www.indiafilings.in,https://fastapi.indiafilings.in"

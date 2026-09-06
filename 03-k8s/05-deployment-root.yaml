@@ -1,0 +1,47 @@
+# Step 3f — the main Next.js site (eks-india-root). No ConfigMap/Secret
+# here: this app's only external URLs (NEXT_PUBLIC_CHECKOUT_URL,
+# NEXT_PUBLIC_API_URL) are baked into the JS bundle at `docker build`
+# time via --build-arg (see eks-india-root/Dockerfile), not read from the
+# environment at runtime — so there's nothing for Kubernetes to inject.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eks-india-root
+  namespace: india
+  labels:
+    app: eks-india-root
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: eks-india-root
+  template:
+    metadata:
+      labels:
+        app: eks-india-root
+    spec:
+      containers:
+        - name: eks-india-root
+          image: 590183900382.dkr.ecr.ap-south-1.amazonaws.com/eks-india-root:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 3000
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"

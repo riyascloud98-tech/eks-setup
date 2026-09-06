@@ -1,0 +1,52 @@
+# Step 3g — the checkout Next.js app (eks-india-checkout). Same reasoning
+# as the root app: NEXT_PUBLIC_SITE_URL / NEXT_PUBLIC_API_URL are baked in
+# at build time via the Dockerfile's ARGs, not runtime env vars.
+#
+# This app now runs with next.config.js's basePath: "/checkout" (fixed a
+# real bug where its _next/static/* asset requests, lacking any prefix,
+# collided with eks-india-root's assets at the ALB path-routing level).
+# basePath applies to ALL of this app's routes, including direct
+# in-container requests — so the healthcheck path below is
+# "/checkout/healthz", not "/healthz".
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eks-india-checkout
+  namespace: india
+  labels:
+    app: eks-india-checkout
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: eks-india-checkout
+  template:
+    metadata:
+      labels:
+        app: eks-india-checkout
+    spec:
+      containers:
+        - name: eks-india-checkout
+          image: 590183900382.dkr.ecr.ap-south-1.amazonaws.com/eks-india-checkout:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+          readinessProbe:
+            httpGet:
+              path: /checkout/healthz
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /checkout/healthz
+              port: 3000
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"

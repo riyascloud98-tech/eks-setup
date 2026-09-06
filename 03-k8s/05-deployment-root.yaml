@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
         - name: eks-india-root
-          image: 590183900382.dkr.ecr.ap-south-1.amazonaws.com/eks-india-root:8b6981b30316f9ad84d91a6a08f7db47378fad44
+          image: 590183900382.dkr.ecr.ap-south-1.amazonaws.com/eks-india-root:865aa1f01783ff0afa39b0d948eaeecf26a4e300
           imagePullPolicy: Always
           ports:
             - containerPort: 3000
